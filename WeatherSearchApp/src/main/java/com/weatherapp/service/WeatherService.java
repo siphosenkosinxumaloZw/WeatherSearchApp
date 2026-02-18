@@ -92,7 +92,7 @@ public class WeatherService {
         snapshot.setLocation(location);
         snapshot.setTemperature(response.getMain().getTemp());
         snapshot.setHumidity(response.getMain().getHumidity());
-        snapshot.setPressure(response.getMain().getPressure());
+        snapshot.setPressure(response.getMain().getPressure() != null ? response.getMain().getPressure().doubleValue() : null);
         
         if (response.getWind() != null) {
             snapshot.setWindSpeed(response.getWind().getSpeed());

@@ -22,6 +22,7 @@ public class OpenWeatherResponse {
     private Long id;
     private String name;
     private Integer cod;
+    private Integer visibility;
     
     public static class Coord {
         private Double lon;
@@ -162,6 +163,8 @@ public class OpenWeatherResponse {
     public void setName(String name) { this.name = name; }
     public Integer getCod() { return cod; }
     public void setCod(Integer cod) { this.cod = cod; }
+    public Integer getVisibility() { return visibility; }
+    public void setVisibility(Integer visibility) { this.visibility = visibility; }
     
     public LocalDateTime getDataTimestamp() {
         if (dt != null) {
