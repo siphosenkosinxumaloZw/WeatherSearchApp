@@ -7,10 +7,10 @@ import com.weatherapp.client.OpenWeatherMapClient;
 import com.weatherapp.dto.OpenWeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,19 +20,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 class WeatherServiceTest {
 
-    @Mock
+    @MockBean
     private WeatherSnapshotRepository weatherRepository;
 
-    @Mock
+    @MockBean
     private LocationService locationService;
 
-    @Mock
+    @MockBean
     private OpenWeatherMapClient weatherClient;
 
-    @InjectMocks
+    @Autowired
     private WeatherService weatherService;
 
     private Location testLocation;
@@ -63,8 +64,12 @@ class WeatherServiceTest {
         wind.setSpeed(5.2);
         wind.setDeg(230);
         mockWeatherResponse.setWind(wind);
-
+        
         mockWeatherResponse.setVisibility(10000);
+        
+        mockWeatherResponse.setDt(System.currentTimeMillis() / 1000);
+
+
     }
 
     @Test

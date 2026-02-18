@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WeatherApiConfig {
     
-    @Value("${weather.api.key}")
+    @Value("${weather.api.key:demo_key_for_development}")
     private String apiKey;
     
     @Bean
