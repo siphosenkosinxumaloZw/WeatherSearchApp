@@ -1,7 +1,7 @@
 package com.weatherapp.controller;
 
 import com.weatherapp.entity.Location;
-import com.weatherapp.service.LocationService;
+import com.weatherapp.service.LocationServiceInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class LocationControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private LocationService locationService;
+    private LocationServiceInterface locationService;
 
     @Autowired
     private ObjectMapper objectMapper;

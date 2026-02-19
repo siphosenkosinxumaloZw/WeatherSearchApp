@@ -1,7 +1,7 @@
 package com.weatherapp.controller;
 
 import com.weatherapp.entity.Location;
-import com.weatherapp.service.LocationService;
+import com.weatherapp.service.LocationServiceInterface;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +16,10 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 public class LocationController {
     
-    private final LocationService locationService;
-    
+    private final LocationServiceInterface locationService;
+
     @Autowired
-    public LocationController(LocationService locationService) {
+    public LocationController(LocationServiceInterface locationService) {
         this.locationService = locationService;
     }
     
@@ -61,8 +61,8 @@ public class LocationController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Location> updateLocation(@PathVariable Long id, 
-                                                   @Valid @RequestBody Location locationDetails) {
+    public ResponseEntity<Location> updateLocation(@PathVariable Long id,
+                                                   @RequestBody Location locationDetails) {
         try {
             Location updatedLocation = locationService.updateLocation(id, locationDetails);
             return ResponseEntity.ok(updatedLocation);

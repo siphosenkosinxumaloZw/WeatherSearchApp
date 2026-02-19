@@ -26,7 +26,7 @@ class WeatherServiceUnitTest {
     private WeatherSnapshotRepository weatherRepository;
 
     @Mock
-    private LocationService locationService;
+    private LocationServiceInterface locationService;
 
     @Mock
     private OpenWeatherMapClient weatherClient;
@@ -37,15 +37,13 @@ class WeatherServiceUnitTest {
     @BeforeEach
     void setUp() {
         weatherService = new WeatherService(weatherRepository, locationService, weatherClient, testApiKey);
-        
-        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
-        testLocation.setId(1L);
-        
-        when(locationService.getLocationById(1L)).thenReturn(Optional.of(testLocation));
     }
 
     @Test
     void getCurrentWeather_Success() {
+        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
+        testLocation.setId(1L);
+        
         WeatherSnapshot snapshot = new WeatherSnapshot();
         snapshot.setId(1L);
         
@@ -69,6 +67,11 @@ class WeatherServiceUnitTest {
 
     @Test
     void syncWeatherData_Success() {
+        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
+        testLocation.setId(1L);
+        
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(testLocation));
+        
         OpenWeatherResponse mockResponse = createMockWeatherResponse();
         
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -99,6 +102,9 @@ class WeatherServiceUnitTest {
 
     @Test
     void syncWeatherData_LocationNotFound_ThrowsException() {
+        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
+        testLocation.setId(1L);
+        
         when(locationService.getLocationById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> weatherService.syncWeatherData(1L));
@@ -110,6 +116,10 @@ class WeatherServiceUnitTest {
 
     @Test
     void syncWeatherData_ApiFailure_ThrowsException() {
+        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
+        testLocation.setId(1L);
+        
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(testLocation));
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
             .thenThrow(new RuntimeException("API Error"));
 
@@ -151,6 +161,11 @@ class WeatherServiceUnitTest {
 
     @Test
     void getForecast_Success() {
+        Location testLocation = new Location("London", "GB", 51.5074, -0.1278);
+        testLocation.setId(1L);
+        
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(testLocation));
+        
         // This test would need ForecastResponse mock
         // For now, just test the exception case
         when(weatherClient.getForecastByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -171,8 +186,8 @@ class WeatherServiceUnitTest {
         weatherService.cleanupOldData();
 
         verify(locationService).getAllLocations();
-        verify(weatherRepository).deleteByLocationIdAndTimestampBefore(1L, any(LocalDateTime.class));
-        verify(weatherRepository).deleteByLocationIdAndTimestampBefore(2L, any(LocalDateTime.class));
+        verify(weatherRepository).deleteByLocationIdAndTimestampBefore(eq(1L), any(LocalDateTime.class));
+        verify(weatherRepository).deleteByLocationIdAndTimestampBefore(eq(2L), any(LocalDateTime.class));
     }
 
     @Test
@@ -183,6 +198,8 @@ class WeatherServiceUnitTest {
         location2.setId(2L);
         
         when(locationService.getAllLocations()).thenReturn(java.util.List.of(location1, location2));
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(location1));
+        when(locationService.getLocationById(2L)).thenReturn(Optional.of(location2));
         
         OpenWeatherResponse mockResponse = createMockWeatherResponse();
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -192,6 +209,8 @@ class WeatherServiceUnitTest {
         weatherService.syncAllLocations();
 
         verify(locationService).getAllLocations();
+        verify(locationService).getLocationById(1L);
+        verify(locationService).getLocationById(2L);
         verify(weatherClient, times(2)).getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString());
         verify(weatherRepository, times(2)).save(any(WeatherSnapshot.class));
         verify(locationService, times(2)).updateLastSyncTime(anyLong());
@@ -205,6 +224,8 @@ class WeatherServiceUnitTest {
         location2.setId(2L);
         
         when(locationService.getAllLocations()).thenReturn(java.util.List.of(location1, location2));
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(location1));
+        when(locationService.getLocationById(2L)).thenReturn(Optional.of(location2));
         
         // First location succeeds, second fails
         OpenWeatherResponse mockResponse = createMockWeatherResponse();
@@ -218,6 +239,8 @@ class WeatherServiceUnitTest {
         assertDoesNotThrow(() -> weatherService.syncAllLocations());
 
         verify(locationService).getAllLocations();
+        verify(locationService).getLocationById(1L);
+        verify(locationService).getLocationById(2L);
         verify(weatherClient, times(2)).getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString());
         verify(weatherRepository, times(1)).save(any(WeatherSnapshot.class));
         verify(locationService, times(1)).updateLastSyncTime(anyLong());

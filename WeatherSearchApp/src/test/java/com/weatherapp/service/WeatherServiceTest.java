@@ -7,10 +7,9 @@ import com.weatherapp.client.OpenWeatherMapClient;
 import com.weatherapp.dto.OpenWeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,20 +19,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class WeatherServiceTest {
 
-    @MockBean
+    @Mock
     private WeatherSnapshotRepository weatherRepository;
 
-    @MockBean
-    private LocationService locationService;
+    @Mock
+    private LocationServiceInterface locationService;
 
-    @MockBean
+    @Mock
     private OpenWeatherMapClient weatherClient;
 
-    @Autowired
     private WeatherService weatherService;
 
     private Location testLocation;
@@ -42,6 +39,7 @@ class WeatherServiceTest {
 
     @BeforeEach
     void setUp() {
+        weatherService = new WeatherService(weatherRepository, locationService, weatherClient, testApiKey);
         testLocation = new Location("London", "GB", 51.5074, -0.1278);
         testLocation.setId(1L);
 

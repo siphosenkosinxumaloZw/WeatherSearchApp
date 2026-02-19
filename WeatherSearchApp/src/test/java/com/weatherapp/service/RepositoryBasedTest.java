@@ -35,6 +35,9 @@ class RepositoryBasedTest {
     private WeatherSnapshotRepository weatherRepository;
 
     @MockBean
+    private LocationServiceInterface locationService;
+
+    @MockBean
     private OpenWeatherMapClient weatherClient;
 
     private OpenWeatherResponse mockWeatherResponse;
@@ -134,14 +137,14 @@ class RepositoryBasedTest {
     @Test
     void testLocationServiceWithRealRepository() {
         // Test LocationService with real repository but mocked API
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         LocationService locationService = new LocationService(locationRepository, weatherClient, "test-api-key");
 
         // Test adding a location
         Location location = locationService.addLocation("London", "GB");
-        
+
         assertNotNull(location.getId());
         assertEquals("London", location.getCityName());
         assertEquals("GB", location.getCountryCode());
@@ -174,7 +177,7 @@ class RepositoryBasedTest {
         List<Location> searchResults = locationService.searchLocations("London");
         assertEquals(1, searchResults.size());
 
-        verify(weatherClient).getCurrentWeather("London,GB", anyString(), anyString());
+        verify(weatherClient).getCurrentWeather(eq("London,GB"), anyString(), anyString());
     }
 
     @Test
@@ -183,8 +186,8 @@ class RepositoryBasedTest {
         Location location = new Location("London", "GB", 51.5074, -0.1278);
         Location savedLocation = locationRepository.save(location);
 
-        // Mock LocationService to return our test location
-        LocationService mockLocationService = mock(LocationService.class);
+        // Mock LocationServiceInterface to return our test location
+        LocationServiceInterface mockLocationService = mock(LocationServiceInterface.class);
         when(mockLocationService.getLocationById(savedLocation.getId())).thenReturn(Optional.of(savedLocation));
 
         // Mock weather API
@@ -225,7 +228,7 @@ class RepositoryBasedTest {
         LocationService locationService = new LocationService(locationRepository, weatherClient, "test-api-key");
 
         // Test adding duplicate location
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         Location location1 = locationService.addLocation("London", "GB");
@@ -237,7 +240,7 @@ class RepositoryBasedTest {
         });
 
         // Test API failure
-        when(weatherClient.getCurrentWeather("Paris,FR", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("Paris,FR"), anyString(), anyString()))
             .thenThrow(new RuntimeException("API Error"));
 
         assertThrows(RuntimeException.class, () -> {
@@ -267,12 +270,16 @@ class RepositoryBasedTest {
         WeatherSnapshot oldSnapshot = new WeatherSnapshot();
         oldSnapshot.setLocation(savedLocation);
         oldSnapshot.setTemperature(10.0);
+        oldSnapshot.setHumidity(50);
+        oldSnapshot.setPressure(1010.0);
         oldSnapshot.setTimestamp(LocalDateTime.now().minusDays(35)); // 35 days old
         weatherRepository.save(oldSnapshot);
 
         WeatherSnapshot recentSnapshot = new WeatherSnapshot();
         recentSnapshot.setLocation(savedLocation);
         recentSnapshot.setTemperature(20.0);
+        recentSnapshot.setHumidity(60);
+        recentSnapshot.setPressure(1015.0);
         recentSnapshot.setTimestamp(LocalDateTime.now().minusDays(5)); // 5 days old
         weatherRepository.save(recentSnapshot);
 

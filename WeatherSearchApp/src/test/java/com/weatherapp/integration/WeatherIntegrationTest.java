@@ -23,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -58,7 +59,7 @@ class WeatherIntegrationTest {
     @Test
     void testCompleteWeatherWorkflow() {
         // Step 1: Add a new location
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         Location location = locationService.addLocation("London", "GB");
@@ -70,7 +71,7 @@ class WeatherIntegrationTest {
         assertEquals(51.5074, location.getLatitude());
         assertEquals(-0.1278, location.getLongitude());
 
-        verify(weatherClient).getCurrentWeather("London,GB", anyString(), anyString());
+        verify(weatherClient).getCurrentWeather(eq("London,GB"), anyString(), anyString());
 
         // Step 2: Sync weather data for the location
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -134,9 +135,9 @@ class WeatherIntegrationTest {
         parisCoord.setLon(2.3522);
         parisResponse.setCoord(parisCoord);
 
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(londonResponse);
-        when(weatherClient.getCurrentWeather("Paris,FR", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("Paris,FR"), anyString(), anyString()))
             .thenReturn(parisResponse);
 
         // Add multiple locations
@@ -178,7 +179,7 @@ class WeatherIntegrationTest {
     @Test
     void testLocationUpdateAndDeletion() {
         // Add a location first
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         Location location = locationService.addLocation("London", "GB");
@@ -210,7 +211,7 @@ class WeatherIntegrationTest {
     @Test
     void testErrorHandling() {
         // Test adding duplicate location
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         locationService.addLocation("London", "GB");
@@ -221,7 +222,7 @@ class WeatherIntegrationTest {
         });
 
         // Test API failure during location addition
-        when(weatherClient.getCurrentWeather("Paris,FR", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("Paris,FR"), anyString(), anyString()))
             .thenThrow(new RuntimeException("API Error"));
 
         assertThrows(RuntimeException.class, () -> {
@@ -229,6 +230,14 @@ class WeatherIntegrationTest {
         });
 
         // Test API failure during weather sync
+        OpenWeatherResponse berlinResponse = createMockWeatherResponse();
+        berlinResponse.setName("Berlin");
+        OpenWeatherResponse.Sys berlinSys = new OpenWeatherResponse.Sys();
+        berlinSys.setCountry("DE");
+        berlinResponse.setSys(berlinSys);
+        when(weatherClient.getCurrentWeather(eq("Berlin,DE"), anyString(), anyString()))
+            .thenReturn(berlinResponse);
+
         Location location = locationService.addLocation("Berlin", "DE");
         
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -242,7 +251,7 @@ class WeatherIntegrationTest {
     @Test
     void testWeatherDataCleanup() {
         // Add location and sync some old weather data
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         Location location = locationService.addLocation("London", "GB");
@@ -267,7 +276,7 @@ class WeatherIntegrationTest {
 
     @Test
     void testLocationSyncTimeUpdate() {
-        when(weatherClient.getCurrentWeather("London,GB", anyString(), anyString()))
+        when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
         Location location = locationService.addLocation("London", "GB");

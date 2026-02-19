@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
-public class LocationService {
+public class LocationService implements LocationServiceInterface {
     
     private final LocationRepository locationRepository;
     private final OpenWeatherMapClient weatherClient;
@@ -45,6 +44,7 @@ public class LocationService {
         return locationRepository.findBySearchTerm(searchTerm);
     }
     
+    @Transactional
     public Location addLocation(String cityName, String countryCode) {
         if (locationRepository.existsByCityNameAndCountryCode(cityName, countryCode)) {
             throw new IllegalArgumentException("Location already exists");
@@ -67,6 +67,7 @@ public class LocationService {
         }
     }
     
+    @Transactional
     public Location updateLocation(Long id, Location locationDetails) {
         Location location = locationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + id));
@@ -81,6 +82,8 @@ public class LocationService {
         return locationRepository.save(location);
     }
     
+    
+    @Transactional
     public void deleteLocation(Long id) {
         if (!locationRepository.existsById(id)) {
             throw new IllegalArgumentException("Location not found with id: " + id);
@@ -88,6 +91,7 @@ public class LocationService {
         locationRepository.deleteById(id);
     }
     
+    @Transactional
     public Location toggleFavorite(Long id) {
         Location location = locationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + id));
@@ -96,6 +100,7 @@ public class LocationService {
         return locationRepository.save(location);
     }
     
+    @Transactional
     public void updateLastSyncTime(Long locationId) {
         Location location = locationRepository.findById(locationId)
             .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + locationId));

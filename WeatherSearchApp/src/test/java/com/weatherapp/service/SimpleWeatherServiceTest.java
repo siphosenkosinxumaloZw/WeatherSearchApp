@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 class SimpleWeatherServiceTest {
 
     private WeatherSnapshotRepository weatherRepository;
-    private LocationService locationService;
+    private LocationServiceInterface locationService;
     private OpenWeatherMapClient weatherClient;
     private WeatherService weatherService;
     private String testApiKey = "test-api-key";
@@ -28,7 +28,7 @@ class SimpleWeatherServiceTest {
     void setUp() {
         // Create mock objects manually
         weatherRepository = mock(WeatherSnapshotRepository.class);
-        locationService = mock(LocationService.class);
+        locationService = mock(LocationServiceInterface.class);
         weatherClient = mock(OpenWeatherMapClient.class);
         
         // Create service instance manually
@@ -185,6 +185,8 @@ class SimpleWeatherServiceTest {
         location2.setId(2L);
         
         when(locationService.getAllLocations()).thenReturn(Arrays.asList(location1, location2));
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(location1));
+        when(locationService.getLocationById(2L)).thenReturn(Optional.of(location2));
         
         OpenWeatherResponse mockResponse = createMockWeatherResponse();
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
@@ -196,6 +198,8 @@ class SimpleWeatherServiceTest {
 
         // Assert
         verify(locationService).getAllLocations();
+        verify(locationService).getLocationById(1L);
+        verify(locationService).getLocationById(2L);
         verify(weatherClient, times(2)).getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString());
         verify(weatherRepository, times(2)).save(any(WeatherSnapshot.class));
         verify(locationService, times(2)).updateLastSyncTime(anyLong());
@@ -210,6 +214,8 @@ class SimpleWeatherServiceTest {
         location2.setId(2L);
         
         when(locationService.getAllLocations()).thenReturn(Arrays.asList(location1, location2));
+        when(locationService.getLocationById(1L)).thenReturn(Optional.of(location1));
+        when(locationService.getLocationById(2L)).thenReturn(Optional.of(location2));
         
         OpenWeatherResponse mockResponse = createMockWeatherResponse();
         when(weatherClient.getCurrentWeatherByCoordinates(51.5074, -0.1278, testApiKey, "metric"))

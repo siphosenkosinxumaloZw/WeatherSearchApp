@@ -19,13 +19,13 @@ import java.util.Optional;
 public class WeatherService {
     
     private final WeatherSnapshotRepository weatherRepository;
-    private final LocationService locationService;
+    private final LocationServiceInterface locationService;
     private final OpenWeatherMapClient weatherClient;
     private final String apiKey;
     
     @Autowired
     public WeatherService(WeatherSnapshotRepository weatherRepository,
-                         LocationService locationService,
+                         LocationServiceInterface locationService,
                          OpenWeatherMapClient weatherClient,
                          String apiKey) {
         this.weatherRepository = weatherRepository;

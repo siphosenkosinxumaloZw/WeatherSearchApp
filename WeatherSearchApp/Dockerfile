@@ -30,7 +30,10 @@ COPY --from=build /app/target/*.jar app.jar
 
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
+
+# Create data directory and set permissions
+RUN mkdir -p /app/data && chown -R appuser:appuser /app
+
 USER appuser
 
 # Expose port 8080
