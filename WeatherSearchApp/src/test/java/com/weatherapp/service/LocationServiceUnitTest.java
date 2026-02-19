@@ -121,7 +121,7 @@ class LocationServiceUnitTest {
             return location;
         });
 
-        Location result = locationService.addLocation("London", "GB");
+        Location result = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -141,7 +141,7 @@ class LocationServiceUnitTest {
         when(locationRepository.existsByCityNameAndCountryCode("London", "GB")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         verify(locationRepository).existsByCityNameAndCountryCode("London", "GB");
@@ -156,7 +156,7 @@ class LocationServiceUnitTest {
             .thenThrow(new RuntimeException("API Error"));
 
         assertThrows(RuntimeException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         verify(locationRepository).existsByCityNameAndCountryCode("London", "GB");

@@ -134,7 +134,7 @@ class SimpleLocationServiceTest {
         });
 
         // Act
-        Location result = locationService.addLocation("London", "GB");
+        Location result = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         // Assert
         assertNotNull(result);
@@ -158,7 +158,7 @@ class SimpleLocationServiceTest {
 
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         // Verify no API calls were made
@@ -176,7 +176,7 @@ class SimpleLocationServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         // Verify interactions

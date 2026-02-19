@@ -45,26 +45,39 @@ public class LocationService implements LocationServiceInterface {
     }
     
     @Transactional
-    public Location addLocation(String cityName, String countryCode) {
+    public Location addLocation(String cityName, String countryCode, Double latitude, Double longitude, String displayName, Boolean isFavorite) {
         if (locationRepository.existsByCityNameAndCountryCode(cityName, countryCode)) {
             throw new IllegalArgumentException("Location already exists");
         }
-        
-        try {
-            OpenWeatherResponse weatherResponse = weatherClient.getCurrentWeather(
-                cityName + "," + countryCode, apiKey, "metric");
-            
-            Location location = new Location();
-            location.setCityName(weatherResponse.getName());
-            location.setCountryCode(weatherResponse.getSys().getCountry());
-            location.setLatitude(weatherResponse.getCoord().getLat());
-            location.setLongitude(weatherResponse.getCoord().getLon());
-            location.setDisplayName(weatherResponse.getName() + ", " + weatherResponse.getSys().getCountry());
-            
-            return locationRepository.save(location);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch location data from API: " + e.getMessage(), e);
+
+        Location location = new Location();
+
+        // If latitude and longitude are provided, use them directly
+        if (latitude != null && longitude != null) {
+            location.setCityName(cityName);
+            location.setCountryCode(countryCode);
+            location.setLatitude(latitude);
+            location.setLongitude(longitude);
+            location.setDisplayName(displayName != null ? displayName : cityName + ", " + countryCode);
+            location.setIsFavorite(isFavorite != null ? isFavorite : false);
+        } else {
+            // Otherwise, fetch from the API
+            try {
+                OpenWeatherResponse weatherResponse = weatherClient.getCurrentWeather(
+                    cityName + "," + countryCode, apiKey, "metric");
+
+                location.setCityName(weatherResponse.getName());
+                location.setCountryCode(weatherResponse.getSys().getCountry());
+                location.setLatitude(weatherResponse.getCoord().getLat());
+                location.setLongitude(weatherResponse.getCoord().getLon());
+                location.setDisplayName(displayName != null ? displayName : weatherResponse.getName() + ", " + weatherResponse.getSys().getCountry());
+                location.setIsFavorite(isFavorite != null ? isFavorite : false);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to fetch location data from API: " + e.getMessage(), e);
+            }
         }
+
+        return locationRepository.save(location);
     }
     
     @Transactional

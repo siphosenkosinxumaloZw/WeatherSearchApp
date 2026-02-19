@@ -15,7 +15,7 @@ public interface LocationServiceInterface {
     
     List<Location> searchLocations(String searchTerm);
     
-    Location addLocation(String cityName, String countryCode);
+    Location addLocation(String cityName, String countryCode, Double latitude, Double longitude, String displayName, Boolean isFavorite);
     
     Location updateLocation(Long id, Location locationDetails);
     

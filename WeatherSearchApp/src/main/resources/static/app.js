@@ -88,12 +88,12 @@ const WeatherApp = () => {
         }
     };
 
-    const addLocation = async (cityName, countryCode) => {
+    const addLocation = async (locationData) => {
         try {
             const response = await fetch(`${API_BASE}/locations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cityName, countryCode })
+                body: JSON.stringify(locationData)
             });
             if (response.ok) {
                 fetchLocations();
@@ -424,17 +424,33 @@ const WeatherApp = () => {
 const AddLocationModal = ({ onClose, onAdd }) => {
     const [cityName, setCityName] = useState('');
     const [countryCode, setCountryCode] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
+    const [displayName, setDisplayName] = useState('');
+    const [isFavorite, setIsFavorite] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!cityName || !countryCode) return;
-        
+
         setLoading(true);
         try {
-            await onAdd(cityName, countryCode);
+            const locationData = {
+                cityName,
+                countryCode,
+                ...(latitude && { latitude: parseFloat(latitude) }),
+                ...(longitude && { longitude: parseFloat(longitude) }),
+                ...(displayName && { displayName }),
+                isFavorite
+            };
+            await onAdd(locationData);
             setCityName('');
             setCountryCode('');
+            setLatitude('');
+            setLongitude('');
+            setDisplayName('');
+            setIsFavorite(false);
         } finally {
             setLoading(false);
         }
@@ -442,12 +458,12 @@ const AddLocationModal = ({ onClose, onAdd }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-screen overflow-y-auto">
                 <h3 className="text-xl font-semibold mb-4">Add New Location</h3>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            City Name
+                            City Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -460,7 +476,7 @@ const AddLocationModal = ({ onClose, onAdd }) => {
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Country Code
+                            Country Code <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -471,6 +487,58 @@ const AddLocationModal = ({ onClose, onAdd }) => {
                             maxLength={2}
                             required
                         />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Latitude (Optional)
+                        </label>
+                        <input
+                            type="number"
+                            step="any"
+                            value={latitude}
+                            onChange={(e) => setLatitude(e.target.value)}
+                            className="w-full p-2 border rounded"
+                            placeholder="e.g., 51.5074"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">If not provided, will be fetched from API</p>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Longitude (Optional)
+                        </label>
+                        <input
+                            type="number"
+                            step="any"
+                            value={longitude}
+                            onChange={(e) => setLongitude(e.target.value)}
+                            className="w-full p-2 border rounded"
+                            placeholder="e.g., -0.1278"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">If not provided, will be fetched from API</p>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Display Name (Optional)
+                        </label>
+                        <input
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            className="w-full p-2 border rounded"
+                            placeholder="e.g., London, United Kingdom"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">If not provided, will be auto-generated</p>
+                    </div>
+                    <div className="mb-4">
+                        <label className="flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={isFavorite}
+                                onChange={(e) => setIsFavorite(e.target.checked)}
+                                className="mr-2"
+                            />
+                            <span className="text-sm font-medium text-gray-700">Mark as Favorite</span>
+                        </label>
                     </div>
                     <div className="flex justify-end space-x-2">
                         <button

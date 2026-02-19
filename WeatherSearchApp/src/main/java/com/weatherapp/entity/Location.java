@@ -1,5 +1,6 @@
 package com.weatherapp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,7 @@ public class Location {
     @Column
     private LocalDateTime lastSyncAt;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<WeatherSnapshot> weatherSnapshots;
     

@@ -3,6 +3,7 @@ package com.weatherapp.controller;
 import com.weatherapp.entity.Location;
 import com.weatherapp.service.LocationServiceInterface;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,14 @@ public class LocationController {
     @PostMapping
     public ResponseEntity<Location> addLocation(@Valid @RequestBody LocationRequest request) {
         try {
-            Location location = locationService.addLocation(request.getCityName(), request.getCountryCode());
+            Location location = locationService.addLocation(
+                request.getCityName(),
+                request.getCountryCode(),
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getDisplayName(),
+                request.getIsFavorite()
+            );
             return ResponseEntity.status(HttpStatus.CREATED).body(location);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -92,12 +100,28 @@ public class LocationController {
     }
     
     public static class LocationRequest {
+        @NotBlank(message = "City name is required")
         private String cityName;
+
+        @NotBlank(message = "Country code is required")
         private String countryCode;
-        
+
+        private Double latitude;
+        private Double longitude;
+        private String displayName;
+        private Boolean isFavorite;
+
         public String getCityName() { return cityName; }
         public void setCityName(String cityName) { this.cityName = cityName; }
         public String getCountryCode() { return countryCode; }
         public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
+        public Double getLatitude() { return latitude; }
+        public void setLatitude(Double latitude) { this.latitude = latitude; }
+        public Double getLongitude() { return longitude; }
+        public void setLongitude(Double longitude) { this.longitude = longitude; }
+        public String getDisplayName() { return displayName; }
+        public void setDisplayName(String displayName) { this.displayName = displayName; }
+        public Boolean getIsFavorite() { return isFavorite; }
+        public void setIsFavorite(Boolean isFavorite) { this.isFavorite = isFavorite; }
     }
 }

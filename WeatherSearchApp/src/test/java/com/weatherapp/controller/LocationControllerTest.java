@@ -86,7 +86,7 @@ class LocationControllerTest {
         Location newLocation = new Location("London", "GB", 51.5074, -0.1278);
         newLocation.setId(1L);
         
-        when(locationService.addLocation("London", "GB")).thenReturn(newLocation);
+        when(locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true)).thenReturn(newLocation);
 
         LocationController.LocationRequest request = new LocationController.LocationRequest();
         request.setCityName("London");

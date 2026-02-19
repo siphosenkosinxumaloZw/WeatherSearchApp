@@ -59,7 +59,7 @@ class LocationServiceTest {
             return location;
         });
 
-        Location result = locationService.addLocation("London", "GB");
+        Location result = locationService.addLocation("London", "GB", null, null, null, null);
 
         assertNotNull(result);
         assertEquals("London", result.getCityName());
@@ -77,10 +77,34 @@ class LocationServiceTest {
         when(locationRepository.existsByCityNameAndCountryCode("London", "GB")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB", null, null, null, null);
         });
 
         verify(locationRepository, never()).save(any(Location.class));
+        verify(weatherClient, never()).getCurrentWeather(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void addLocation_WithProvidedCoordinates_Success() {
+        when(locationRepository.existsByCityNameAndCountryCode("Paris", "FR")).thenReturn(false);
+        when(locationRepository.save(any(Location.class))).thenAnswer(invocation -> {
+            Location location = invocation.getArgument(0);
+            location.setId(2L);
+            return location;
+        });
+
+        Location result = locationService.addLocation("Paris", "FR", 48.8566, 2.3522, "Paris, France", true);
+
+        assertNotNull(result);
+        assertEquals("Paris", result.getCityName());
+        assertEquals("FR", result.getCountryCode());
+        assertEquals(48.8566, result.getLatitude());
+        assertEquals(2.3522, result.getLongitude());
+        assertEquals("Paris, France", result.getDisplayName());
+        assertTrue(result.getIsFavorite());
+
+        verify(locationRepository).save(any(Location.class));
+        // Should not call weather API when coordinates are provided
         verify(weatherClient, never()).getCurrentWeather(anyString(), anyString(), anyString());
     }
 

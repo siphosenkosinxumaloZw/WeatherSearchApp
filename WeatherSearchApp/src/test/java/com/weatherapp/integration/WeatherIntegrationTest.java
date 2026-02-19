@@ -62,7 +62,7 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        Location location = locationService.addLocation("London", "GB");
+        Location location = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         assertNotNull(location);
         assertNotNull(location.getId());
@@ -141,8 +141,8 @@ class WeatherIntegrationTest {
             .thenReturn(parisResponse);
 
         // Add multiple locations
-        Location london = locationService.addLocation("London", "GB");
-        Location paris = locationService.addLocation("Paris", "FR");
+        Location london = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
+        Location paris = locationService.addLocation("Paris", "FR",48.8566, 2.3522, "Paris", true);
 
         // Verify both locations were added
         List<Location> allLocations = locationService.getAllLocations();
@@ -182,7 +182,7 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        Location location = locationService.addLocation("London", "GB");
+        Location location = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         // Update location
         Location updateDetails = new Location();
@@ -214,11 +214,11 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        locationService.addLocation("London", "GB");
+        locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         // Attempt to add same location again
         assertThrows(IllegalArgumentException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         // Test API failure during location addition
@@ -226,7 +226,7 @@ class WeatherIntegrationTest {
             .thenThrow(new RuntimeException("API Error"));
 
         assertThrows(RuntimeException.class, () -> {
-            locationService.addLocation("Paris", "FR");
+            locationService.addLocation("Paris", "FR",48.8566, 2.3522, "Paris", true);
         });
 
         // Test API failure during weather sync
@@ -238,7 +238,7 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("Berlin,DE"), anyString(), anyString()))
             .thenReturn(berlinResponse);
 
-        Location location = locationService.addLocation("Berlin", "DE");
+        Location location = locationService.addLocation("Berlin", "DE",52.52, 13.405, "Berlin", true);
         
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
             .thenThrow(new RuntimeException("Weather API Error"));
@@ -254,7 +254,7 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        Location location = locationService.addLocation("London", "GB");
+        Location location = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
 
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
@@ -279,7 +279,7 @@ class WeatherIntegrationTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        Location location = locationService.addLocation("London", "GB");
+        Location location = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         assertNull(location.getLastSyncAt());
 
         when(weatherClient.getCurrentWeatherByCoordinates(anyDouble(), anyDouble(), anyString(), anyString()))

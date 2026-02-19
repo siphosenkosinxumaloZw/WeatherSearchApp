@@ -143,7 +143,7 @@ class RepositoryBasedTest {
         LocationService locationService = new LocationService(locationRepository, weatherClient, "test-api-key");
 
         // Test adding a location
-        Location location = locationService.addLocation("London", "GB");
+        Location location = locationService.addLocation("London", "GB", null, null, null, null);
 
         assertNotNull(location.getId());
         assertEquals("London", location.getCityName());
@@ -231,12 +231,12 @@ class RepositoryBasedTest {
         when(weatherClient.getCurrentWeather(eq("London,GB"), anyString(), anyString()))
             .thenReturn(mockWeatherResponse);
 
-        Location location1 = locationService.addLocation("London", "GB");
+        Location location1 = locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         assertNotNull(location1.getId());
 
         // Try to add same location again
         assertThrows(IllegalArgumentException.class, () -> {
-            locationService.addLocation("London", "GB");
+            locationService.addLocation("London", "GB",51.5074, -0.1278, "London", true);
         });
 
         // Test API failure
@@ -244,7 +244,7 @@ class RepositoryBasedTest {
             .thenThrow(new RuntimeException("API Error"));
 
         assertThrows(RuntimeException.class, () -> {
-            locationService.addLocation("Paris", "FR");
+            locationService.addLocation("Paris", "FR",48.8566, 2.3522, "Paris", true);
         });
 
         // Test location not found
