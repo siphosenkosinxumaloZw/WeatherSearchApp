@@ -21,12 +21,14 @@ const WeatherApp = () => {
     useEffect(() => {
         fetchLocations();
         fetchPreferences();
+    }, []);
+
+    useEffect(() => {
+        if (!preferences.autoRefresh) return;
         const interval = setInterval(() => {
-            if (preferences.autoRefresh) {
-                fetchLocations();
-                if (selectedLocation) {
-                    fetchWeatherData(selectedLocation.id);
-                }
+            fetchLocations();
+            if (selectedLocation) {
+                fetchWeatherData(selectedLocation.id);
             }
         }, preferences.refreshInterval * 60 * 1000);
         return () => clearInterval(interval);
@@ -53,6 +55,19 @@ const WeatherApp = () => {
             }
         } catch (err) {
             console.error('Failed to fetch preferences');
+        }
+    };
+
+    const savePreferences = async (updatedPreferences) => {
+        setPreferences(updatedPreferences);
+        try {
+            await fetch(`${API_BASE}/preferences`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedPreferences)
+            });
+        } catch (err) {
+            console.error('Failed to save preferences');
         }
     };
 
@@ -280,7 +295,7 @@ const WeatherApp = () => {
                                     </label>
                                     <select
                                         value={preferences.temperatureUnit}
-                                        onChange={(e) => setPreferences({...preferences, temperatureUnit: e.target.value})}
+                                        onChange={(e) => savePreferences({...preferences, temperatureUnit: e.target.value})}
                                         className="w-full p-2 border rounded"
                                     >
                                         <option value="celsius">Celsius</option>
@@ -295,7 +310,7 @@ const WeatherApp = () => {
                                         <input
                                             type="checkbox"
                                             checked={preferences.autoRefresh}
-                                            onChange={(e) => setPreferences({...preferences, autoRefresh: e.target.checked})}
+                                            onChange={(e) => savePreferences({...preferences, autoRefresh: e.target.checked})}
                                             className="mr-2"
                                         />
                                         Enable auto refresh

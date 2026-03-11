@@ -60,7 +60,7 @@ public class UserPreferencesService {
         preferences.setWindSpeedUnit("kmh");
         preferences.setPressureUnit("hPa");
         preferences.setRefreshInterval(30);
-        preferences.setAutoRefresh(false);
+        preferences.setAutoRefresh(true);
         
         return preferencesRepository.save(preferences);
     }
